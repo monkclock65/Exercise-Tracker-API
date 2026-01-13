@@ -58,13 +58,16 @@ def get_data_by_id(id):
 @app.route("/exercises", methods=["POST"])
 def add_exercise():
     data = request.get_json() or {}
+    required = ["workout", "weight", "rep", "sets"]
+    for i in required:
+            if i not in data:
+                return jsonify({"message": f"Missing field: {i}"}), 400
     e = Exercise(
         workout=data.get("workout"),
         weight=data.get("weight"),
         rep=data.get("rep"),
         sets=data.get("sets"),
     )
-    
     db.session.add(e)
     db.session.commit()
     
@@ -108,7 +111,7 @@ def delete_exercise(id):
       if e_id:
          db.session.delete(e_id)
          db.session.commit()
-         return jsonify(""), 204
+         return "", 204
       else:
          return jsonify({"message": "Exercise not found"}), 404
 
