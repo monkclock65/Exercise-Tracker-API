@@ -1,6 +1,7 @@
 
 from flask import Flask,jsonify, request
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from sqlalchemy import Integer,String
 from sqlalchemy.orm import DeclarativeBase,Mapped,mapped_column
 # database setup
@@ -12,17 +13,16 @@ db=SQLAlchemy(model_class=Base)
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"]="sqlite:///project.db"
 db.init_app(app)
+migrate = Migrate(app, db) 
 # database model
 class Exercise(db.Model):
  id: Mapped[int] = mapped_column(Integer,primary_key=True)
  workout: Mapped[str] = mapped_column(String,nullable=False)
  weight: Mapped[int] = mapped_column(Integer,nullable=False)
- rep: Mapped[int] = mapped_column(Integer,nullable=False)
+ reps: Mapped[int] = mapped_column(Integer,nullable=False)
  sets: Mapped[int] = mapped_column(Integer,nullable=False)
+ date: Mapped[str] = mapped_column(String, nullable= False)
 
-
-with app.app_context():
-  db.create_all()
 # get all exercises
 @app.route("/exercises")
 def get_data():
@@ -36,7 +36,8 @@ def get_data():
         "workout": e.workout,
         "weight": e.weight,
         "sets": e.sets,
-        "rep": e.rep
+        "reps": e.reps,
+        "date": e.date
     }
     for e in exercise
     ])
@@ -51,7 +52,8 @@ def get_data_by_id(id):
             "workout": e_id.workout,
             "weight": e_id.weight,
             "sets": e_id.sets,
-            "rep": e_id.rep
+            "reps": e_id.reps,
+            "date": e_id.date
          }
       ), 200
    else:
@@ -60,15 +62,16 @@ def get_data_by_id(id):
 @app.route("/exercises", methods=["POST"])
 def add_exercise():
     data = request.get_json() or {}
-    required = ["workout", "weight", "rep", "sets"]
+    required = ["workout", "weight", "reps", "sets", "date"]
     for i in required:
             if i not in data:
                 return jsonify({"message": f"Missing field: {i}"}), 400
     e = Exercise(
         workout=data.get("workout"),
         weight=data.get("weight"),
-        rep=data.get("rep"),
+        reps=data.get("reps"),
         sets=data.get("sets"),
+         date=data.get("date")
     )
     db.session.add(e)
     db.session.commit()
@@ -78,7 +81,8 @@ def add_exercise():
          "workout": e.workout,
          "weight": e.weight,
          "sets": e.sets,
-         "rep": e.rep
+         "reps": e.reps,
+         "date": e.date
     }), 201
 # udate exercise by id
 @app.route("/exercises/<int:id>", methods=["PATCH"])
@@ -86,7 +90,7 @@ def update_exercise(id):
       e_id = db.session.get(Exercise, id)
       if e_id: 
          data = request.get_json() or {}
-         for field in ["workout", "weight", "rep", "sets"]:
+         for field in ["workout", "weight", "reps", "sets", "date"]:
             if field in data:
                setattr(e_id, field, data[field])
          db.session.commit()
@@ -99,7 +103,7 @@ def replace_exercise(id):
     e_id = db.session.get(Exercise, id)
     if e_id:
         data = request.get_json() or {}
-        required = ["workout", "weight", "rep", "sets"]
+        required = ["workout", "weight", "reps", "sets", "date"]
         for i in required:
             if i not in data:
                 return jsonify({"message": f"Missing field: {i}"}), 400
@@ -120,4 +124,4 @@ def delete_exercise(id):
          return jsonify({"message": "Exercise not found"}), 404
 # run the app
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
