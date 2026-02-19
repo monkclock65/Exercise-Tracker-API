@@ -3,16 +3,16 @@ from flask import Flask,jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Integer,String
 from sqlalchemy.orm import DeclarativeBase,Mapped,mapped_column
-
+# database setup
 class Base(DeclarativeBase):
    pass
 
 db=SQLAlchemy(model_class=Base)
-
+# flask configuration 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"]="sqlite:///project.db"
 db.init_app(app)
-
+# database model
 class Exercise(db.Model):
  id: Mapped[int] = mapped_column(Integer,primary_key=True)
  workout: Mapped[str] = mapped_column(String,nullable=False)
@@ -23,7 +23,7 @@ class Exercise(db.Model):
 
 with app.app_context():
   db.create_all()
-
+# get all exercises
 @app.route("/exercises")
 def get_data():
 
@@ -40,6 +40,7 @@ def get_data():
     }
     for e in exercise
     ])
+# get exercise by id
 @app.route("/exercises/<int:id>")
 def get_data_by_id(id):
    e_id = db.session.get(Exercise, id)
@@ -55,6 +56,7 @@ def get_data_by_id(id):
       ), 200
    else:
       return jsonify({"message": "Exercise not found"}), 404
+# add new exercise
 @app.route("/exercises", methods=["POST"])
 def add_exercise():
     data = request.get_json() or {}
@@ -78,6 +80,7 @@ def add_exercise():
          "sets": e.sets,
          "rep": e.rep
     }), 201
+# udate exercise by id
 @app.route("/exercises/<int:id>", methods=["PATCH"])
 def update_exercise(id):
       e_id = db.session.get(Exercise, id)
@@ -90,6 +93,7 @@ def update_exercise(id):
          return jsonify({"message": "Exercise updated successfully"}), 200
       else:
          return jsonify({"message": "Exercise not found"}), 404
+   # replace exercise by id
 @app.route("/exercises/<int:id>", methods=["PUT"])
 def replace_exercise(id):
     e_id = db.session.get(Exercise, id)
@@ -104,7 +108,7 @@ def replace_exercise(id):
         return jsonify({"message": "Exercise replaced successfully"}), 200
     else:
         return jsonify({"message": "Exercise not found"}), 404
-
+# delete exercise by id
 @app.route("/exercises/<int:id>", methods=["DELETE"])
 def delete_exercise(id):
       e_id = db.session.get(Exercise, id)
@@ -114,6 +118,6 @@ def delete_exercise(id):
          return "", 204
       else:
          return jsonify({"message": "Exercise not found"}), 404
-
+# run the app
 if __name__ == "__main__":
     app.run(debug=True)
