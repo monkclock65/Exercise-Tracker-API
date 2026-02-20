@@ -123,5 +123,4 @@ def delete_exercise(id):
       else:
          return jsonify({"message": "Exercise not found"}), 404
 # run the app
-if __name__ == "__main__":
-    app.run(debug=False)
+debug = False 
