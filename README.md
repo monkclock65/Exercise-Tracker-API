@@ -19,7 +19,7 @@ Simple exercise tracking API built using **Python Flask** and **SQLite** to trac
 
 ## Required JSON for POST/PUT/PATCH
 
- '''json
+```json
 {
     "workout": "Squat",
     "weight": 225,
@@ -27,10 +27,18 @@ Simple exercise tracking API built using **Python Flask** and **SQLite** to trac
     "reps": 5,
     "date": "2026-02-19"
 }
-'''
-Deployment link: https://exercise-tracker-api-1.onrender.com/
+```
 
-Sample get request: 
-![image of get request in postman](img/api-screenshot.png)
+---
 
-All endpoints were tested in postman. 
+## Deployment
+
+[Exercise Tracker API](https://exercise-tracker-api-1.onrender.com/)
+
+---
+
+## Sample GET Request
+
+![image of GET request in Postman](img/api-screenshot.png)
+
+All endpoints were tested in Postman.
