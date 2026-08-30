@@ -1,4 +1,6 @@
 
+import os
+
 from flask import Flask,jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -11,7 +13,8 @@ class Base(DeclarativeBase):
 db=SQLAlchemy(model_class=Base)
 # flask configuration 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"]="sqlite:///project.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///project.db")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 migrate = Migrate(app, db) 
 # database model
@@ -122,5 +125,12 @@ def delete_exercise(id):
          return "", 204
       else:
          return jsonify({"message": "Exercise not found"}), 404
+
+with app.app_context():
+    db.create_all()
+
 # run the app
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "5000")))
+
 debug = False 
